@@ -16,66 +16,48 @@ call display function:
 	-console log response data*/
 
 
-
-
-function handleResponse(res) {
-	console.log(res.content)
-	if (!res.ok) {
-		if (
-			res.headers.has("content-type") &&
-			res.headers.get("content-type").startsWith("application/json")
-		) {
-			return res.json().then(err => Promise.reject(err))
-		}
-		return Promise.reject({
-			code: res.status,
-			message: res.statutText
-		});
-	}
-	console.log(res.json());
-	// if (res.ok) {
-	// return res.json()}
-	// throw new error(response.statusText);
-}
-
-function pend(resj) {
+function addContent(resj) {
 	for(i = 0; i < resj.length; i++) {
 $('.js-results').append(`<a href="${resj[i].html_url}" target="_blank">${resj[i].name}</a>`)
-	
 
-	}
+  }
+}
+
+function handleError(err) {
+$('.js-results').append(`<p>There was a problem : ${err.message}</p>`)
+}
+
+function checkRes(res) {
+if (res.ok) {
+	return res.json()
+}
+throw new Error(response.statusText)
+
 }
 
 function getData(handle) {
-	const par = '/repos?&type=owner'
+	const param = '/repos?&type=owner'
 	
-	const params = {
-			"type": 'owner',
-				}
-
 	const URL = 'https://api.github.com/users/'
-	const paramKey = Object.keys(params)
-	fetch(URL + handle + par)
-	.then(response => response.json())
-	.then(resj => pend(resj))
+	
+	fetch(URL + handle + param)
+	.then(response => checkRes(response))
+	.then(resj => addContent(resj))
+	.catch(err => handleError(err))
 
 
 }
 
 
+function formListener() {
 
 $('.form').submit(function(e) {
 	e.preventDefault();
 	$('.js-results').empty().removeClass('hidden')
 	const handle = $('.js-search-field').val()
 	getData(handle);
-	console.log()
 })
+}
 
+formListener()
 
-
-/*
-fetch(URL + handle + '/repos?&' + paramKey + `=` + params.type)
-
-
-*/
